@@ -24,4 +24,15 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
+      - name: Check Supabase env (배포 후 홈에 "연결됨" 안 보이면 여기 확인)
+        run: |
+          echo "VITE_SUPABASE_URL 설정됨: $([ -n \"$VITE_SUPABASE_URL\" ] && echo yes || echo no)"
+          echo "VITE_SUPABASE_ANON_KEY 설정됨: $([ -n \"$VITE_SUPABASE_ANON_KEY\" ] && echo yes || echo no)"
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "::warning::Supabase Secret이 비어 있음. Settings → Secrets에서 값 넣은 뒤 다시 배포하세요."
+          fi
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
       - run: npm run deploy

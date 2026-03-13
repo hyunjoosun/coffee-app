@@ -17,7 +17,7 @@ function App() {
       <TeamProvider>
         <CafeProvider>
           <OrderProvider>
-          <BrowserRouter>
+          <BrowserRouter basename="/coffee-app">
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/login" element={<Login />} />

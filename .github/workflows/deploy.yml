@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Actions 탭에서 "Run workflow" 버튼으로 수동 실행
 
 permissions:
   contents: write

@@ -1,0 +1,89 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+# testing
+coverage
+
+# next.js
+.next/
+out/
+build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# turbo
+.turbo
+
+# vercel
+.vercel
+
+# storybook
+storybook-static
+
+# production
+build
+
+# typescript
+*.tsbuildinfo
+
+#serverless
+.serverless
+.serverless_nextjs
+
+#vscode settings
+.vscode
+
+#claude settings
+.claude
+
+#snapshots
+__snapshots__
+
+#IntlliJ
+.idea
+build_tar
+
+.lh
+#Husky
+.husky/common.sh
+
+dist/
+
+
+# Logs
+**/logs/*.log
+**/logs/*.json
+**/log/*.log
+**/log/*.json
+apps/pharmacy/*.log
+
+.sonarlint
+
+# ai 관련
+/.agent
+/.agents
+/.claude
+/.codex
+/.gemini
+/.opencode
+/.omc
+/AGENTS.md

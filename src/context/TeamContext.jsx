@@ -4,21 +4,15 @@ const TeamContext = createContext(null);
 
 const STORAGE_KEY = 'ec-coffee-team-members';
 
-const INITIAL_MEMBERS = [
-  { id: 1, name: '김철수' },
-  { id: 2, name: '이영희' },
-  { id: 3, name: '박민수' },
-];
-
 function loadMembers() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (_) {}
-  return INITIAL_MEMBERS;
+  return [];
 }
 
 export function TeamProvider({ children }) {

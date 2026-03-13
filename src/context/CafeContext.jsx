@@ -3,23 +3,17 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const CafeContext = createContext(null);
 const STORAGE_KEY = 'ec-coffee-cafes';
 
-const INITIAL_CAFES = [
-  { id: 1, name: '스타벅스 강남점', menus: [{ id: 1, name: '아메리카노' }, { id: 2, name: '카페 라떼' }, { id: 3, name: '카라멜 마키아또' }], menuImage: null },
-  { id: 2, name: '이디야 역삼점', menus: [{ id: 1, name: '바닐라 라떼' }, { id: 2, name: '녹차 라떼' }], menuImage: null },
-  { id: 3, name: '투썸 신논현점', menus: [{ id: 1, name: '아메리카노' }, { id: 2, name: '밀크티' }], menuImage: null },
-];
-
 function loadCafes() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed.map((c) => ({ ...c, menuImage: c.menuImage ?? null }));
       }
     }
   } catch (_) {}
-  return INITIAL_CAFES;
+  return [];
 }
 
 export function CafeProvider({ children }) {

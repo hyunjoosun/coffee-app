@@ -3,12 +3,19 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const CafeContext = createContext(null);
 const STORAGE_KEY = 'ec-coffee-cafes';
 
+const OLD_DEFAULT_CAFE_NAMES = new Set(['스타벅스 강남점', '이디야 역삼점', '투썸 신논현점']);
+
 function loadCafes() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
+        const names = new Set(parsed.map((c) => c?.name).filter(Boolean));
+        if (names.size === OLD_DEFAULT_CAFE_NAMES.size && [...names].every((n) => OLD_DEFAULT_CAFE_NAMES.has(n))) {
+          localStorage.removeItem(STORAGE_KEY);
+          return [];
+        }
         return parsed.map((c) => ({ ...c, menuImage: c.menuImage ?? null }));
       }
     }

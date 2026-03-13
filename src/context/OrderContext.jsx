@@ -74,7 +74,13 @@ export function OrderProvider({ children }) {
             setOrders((prev) => (prev.some((o) => o.id === newOrder.id) ? prev : [newOrder, ...prev]));
           } else if (payload.eventType === 'UPDATE') {
             setOrders((prev) =>
-              prev.map((o) => (o.id === payload.new.id ? rowToOrder(payload.new) : o))
+              prev.map((o) => {
+                if (o.id !== payload.new.id) return o;
+                const updated = rowToOrder(payload.new);
+                // payload에 items가 비어 오는 경우 기존 items 유지 (상세에서 내용 안 나오는 현상 방지)
+                const items = (updated.items?.length ? updated.items : o.items) ?? [];
+                return { ...updated, items };
+              })
             );
           } else if (payload.eventType === 'DELETE') {
             setOrders((prev) => prev.filter((o) => o.id !== payload.old.id));

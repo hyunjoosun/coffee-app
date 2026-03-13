@@ -26,9 +26,10 @@ export default function OrderSummary() {
     );
   }
 
+  const orderItems = Array.isArray(order.items) ? order.items : [];
   const mergedItems = (() => {
     const map = {};
-    order.items.forEach((item) => {
+    orderItems.forEach((item) => {
       const names = item.orderedByList?.length === item.count
         ? item.orderedByList
         : (item.orderedBy ? Array(item.count).fill(item.orderedBy) : []);

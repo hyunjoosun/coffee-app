@@ -9,6 +9,24 @@
 
 Tailwind CSS(CDN)로 스타일링.
 
+### 실시간 데이터 동기화 (Supabase)
+
+같은 앱을 쓰는 사람끼리 **주문을 실시간으로 공유**하려면 Supabase를 연결하세요.
+
+1. [Supabase](https://supabase.com)에서 프로젝트 생성
+2. **SQL Editor**에서 `supabase/schema.sql` 내용 전체 실행 (orders 테이블 + RLS + Realtime)
+3. **Settings → API**에서 Project URL, anon public key 복사
+4. 프로젝트 루트에 `.env` 생성:
+
+   ```
+   VITE_SUPABASE_URL=https://xxxx.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJ...
+   ```
+
+5. `npm run dev` 또는 `npm run build` 후 배포
+
+`.env`가 없으면 기존처럼 **로컬 저장소(localStorage)** 만 사용합니다.
+
 ```bash
 npm run dev
 ```

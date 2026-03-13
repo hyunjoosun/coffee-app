@@ -6,7 +6,7 @@ import { IconBack, IconList, IconCoffee, IconHome } from '../components/Icons';
 
 export default function Orders() {
   const { user } = useAuth();
-  const { orders, clearOrders, removeOrders } = useOrder();
+  const { orders, clearOrders, removeOrders, isLoading, syncError } = useOrder();
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
 
@@ -31,6 +31,12 @@ export default function Orders() {
         </Link>
       </header>
       <div className="p-6 max-w-[360px] mx-auto">
+        {isLoading && (
+          <p className="text-xs text-[var(--color-muted)] mb-2">주문 목록 불러오는 중…</p>
+        )}
+        {syncError && (
+          <p className="text-xs text-amber-600 mb-2">동기화 오류: {syncError}</p>
+        )}
         <div className="flex items-center justify-between gap-3 mb-4">
           <p className="text-sm text-[var(--color-muted)]">지난 커피 취합 주문을 확인하세요</p>
           {orders.length > 0 && !isDeleteMode && (

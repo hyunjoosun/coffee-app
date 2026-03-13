@@ -37,4 +37,9 @@ jobs:
             echo "::warning::Supabase Secret이 비어 있음. Settings → Secrets에서 값 넣은 뒤 다시 배포하세요."
           fi
 
+      - name: Set Git user (gh-pages 커밋용)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - run: npm run deploy

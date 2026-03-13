@@ -31,6 +31,10 @@ function rowToOrder(row) {
   };
 }
 
+function sortByNewest(prev) {
+  return [...prev].sort((a, b) => Number(b.id) - Number(a.id));
+}
+
 export function OrderProvider({ children }) {
   const [orders, setOrders] = useState(loadOrdersFromStorage);
   const [isLoading, setIsLoading] = useState(isSupabaseEnabled());
@@ -46,7 +50,7 @@ export function OrderProvider({ children }) {
         .select('*')
         .order('id', { ascending: false });
       if (error) throw error;
-      setOrders((data ?? []).map(rowToOrder));
+      setOrders(sortByNewest((data ?? []).map(rowToOrder)));
     } catch (err) {
       console.error('Supabase fetch orders:', err);
       setSyncError(err.message);
@@ -71,19 +75,20 @@ export function OrderProvider({ children }) {
         (payload) => {
           if (payload.eventType === 'INSERT') {
             const newOrder = rowToOrder(payload.new);
-            setOrders((prev) => (prev.some((o) => o.id === newOrder.id) ? prev : [newOrder, ...prev]));
+            setOrders((prev) => (prev.some((o) => o.id === newOrder.id) ? prev : sortByNewest([newOrder, ...prev])));
           } else if (payload.eventType === 'UPDATE') {
-            setOrders((prev) =>
-              prev.map((o) => {
+            setOrders((prev) => {
+              const next = prev.map((o) => {
                 if (o.id !== payload.new.id) return o;
                 const updated = rowToOrder(payload.new);
                 // payload에 items가 비어 오는 경우 기존 items 유지 (상세에서 내용 안 나오는 현상 방지)
                 const items = (updated.items?.length ? updated.items : o.items) ?? [];
                 return { ...updated, items };
-              })
-            );
+              });
+              return sortByNewest(next);
+            });
           } else if (payload.eventType === 'DELETE') {
-            setOrders((prev) => prev.filter((o) => o.id !== payload.old.id));
+            setOrders((prev) => sortByNewest(prev.filter((o) => o.id !== payload.old.id)));
           }
         }
       )
@@ -121,12 +126,12 @@ export function OrderProvider({ children }) {
       if (error) {
         console.error('Supabase add order:', error);
         setSyncError(error.message);
-        setOrders((prev) => [{ ...order, id }, ...prev]);
+        setOrders((prev) => sortByNewest([{ ...order, id }, ...prev]));
         return id;
       }
-      setOrders((prev) => [{ ...order, id }, ...prev]);
+      setOrders((prev) => sortByNewest([{ ...order, id }, ...prev]));
     } else {
-      setOrders((prev) => [{ ...order, id }, ...prev]);
+      setOrders((prev) => sortByNewest([{ ...order, id }, ...prev]));
     }
     return id;
   };
@@ -153,12 +158,26 @@ export function OrderProvider({ children }) {
         setSyncError(error.message);
       }
     }
-    setOrders((prev) =>
-      prev.map((o) => (o.id === numId ? { ...o, ...updates } : o))
-    );
+    setOrders((prev) => sortByNewest(prev.map((o) => (o.id === numId ? { ...o, ...updates } : o))));
   };
 
   const getOrder = (id) => orders.find((o) => o.id === Number(id));
+
+  const fetchOrderById = useCallback(async (id) => {
+    const numId = Number(id);
+    if (!supabase || Number.isNaN(numId)) return null;
+    try {
+      const { data, error } = await supabase.from('orders').select('*').eq('id', numId).maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      const fresh = rowToOrder(data);
+      setOrders((prev) => sortByNewest([fresh, ...prev.filter((o) => o.id !== numId)]));
+      return fresh;
+    } catch (err) {
+      console.error('Supabase fetch order by id:', err);
+      return null;
+    }
+  }, []);
 
   const getOpenOrderByShop = (shopName) =>
     orders.find((o) => o.shop === shopName && o.status === STATUS.inProgress);
@@ -202,6 +221,7 @@ export function OrderProvider({ children }) {
         addOrder,
         updateOrder,
         getOrder,
+        fetchOrderById,
         getOpenOrderByShop,
         clearOrders,
         removeOrders,

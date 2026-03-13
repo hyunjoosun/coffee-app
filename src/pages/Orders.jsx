@@ -13,7 +13,7 @@ export default function Orders() {
   // 메뉴를 한 명이라도 선택한 주문만 이력에 표시 (카페만 들어가고 선택 안 한 건 제외)
   const displayOrders = orders.filter(
     (o) => (o.count ?? 0) > 0 || (o.items?.length ?? 0) > 0
-  );
+  ).sort((a, b) => Number(b.id) - Number(a.id));
 
   if (!user) {
     return (

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useOrder } from '../context/OrderContext';
@@ -6,8 +7,28 @@ import { IconBack, IconHome } from '../components/Icons';
 export default function OrderSummary() {
   const { user } = useAuth();
   const { id } = useParams();
-  const { getOrder } = useOrder();
+  const { getOrder, fetchOrderById } = useOrder();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const order = getOrder(id);
+
+  useEffect(() => {
+    let alive = true;
+    const needsRefresh =
+      order == null ||
+      ((order.count ?? 0) > 0 && ((Array.isArray(order.items) ? order.items.length : 0) === 0));
+
+    if (!needsRefresh) return () => {};
+
+    (async () => {
+      setIsRefreshing(true);
+      await fetchOrderById(id);
+      if (alive) setIsRefreshing(false);
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [id, order?.id, order?.count, order?.items, fetchOrderById]);
 
   if (!user) {
     return (
@@ -20,7 +41,9 @@ export default function OrderSummary() {
   if (!order) {
     return (
       <div className="min-h-screen bg-[var(--color-surface)] flex flex-col items-center justify-center px-6">
-        <p className="text-sm text-[var(--color-muted)] mb-4">주문을 찾을 수 없습니다</p>
+        <p className="text-sm text-[var(--color-muted)] mb-4">
+          {isRefreshing ? '주문 불러오는 중…' : '주문을 찾을 수 없습니다'}
+        </p>
         <Link to="/orders" className="py-2 px-4 rounded-[var(--radius)] bg-gradient-primary text-sm">주문 이력으로</Link>
       </div>
     );

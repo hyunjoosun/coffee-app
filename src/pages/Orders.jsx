@@ -10,6 +10,11 @@ export default function Orders() {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
 
+  // 메뉴를 한 명이라도 선택한 주문만 이력에 표시 (카페만 들어가고 선택 안 한 건 제외)
+  const displayOrders = orders.filter(
+    (o) => (o.count ?? 0) > 0 || (o.items?.length ?? 0) > 0
+  );
+
   if (!user) {
     return (
       <div className="min-h-screen bg-[var(--color-surface)] flex flex-col items-center justify-center px-6">
@@ -39,7 +44,7 @@ export default function Orders() {
         )}
         <div className="flex items-center justify-between gap-3 mb-4">
           <p className="text-sm text-[var(--color-muted)]">지난 커피 취합 주문을 확인하세요</p>
-          {orders.length > 0 && !isDeleteMode && (
+          {displayOrders.length > 0 && !isDeleteMode && (
             <button
               type="button"
               onClick={() => setIsDeleteMode(true)}
@@ -75,7 +80,7 @@ export default function Orders() {
           </div>
         )}
         <div className="space-y-2 mb-6">
-          {orders.map((order) => (
+          {displayOrders.map((order) => (
             isDeleteMode ? (
               <label
                 key={order.id}

@@ -159,7 +159,7 @@ export default function OrderNew() {
                 type="file"
                 accept="image/*"
                 onChange={(e) => setMenuImageFile(e.target.files?.[0] ?? null)}
-                className="block w-full text-sm text-[var(--color-text)] file:mr-2 file:py-2 file:px-3 file:rounded-[var(--radius)] file:border-0 file:text-sm file:font-medium file:bg-gradient-primary file:text-white file:cursor-pointer"
+                className="block w-full text-sm text-[var(--color-text)] file:mr-3 file:py-2.5 file:px-4 file:rounded-[var(--radius)] file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-primary)] file:text-white file:shadow file:cursor-pointer hover:file:bg-[var(--color-primary-hover)] file:transition-colors"
               />
               {menuImageFile && (
                 <p className="mt-1 text-xs text-[var(--color-muted)]">{menuImageFile.name}</p>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTeam } from '../context/TeamContext';
 import { useCafe } from '../context/CafeContext';
@@ -16,6 +16,7 @@ export default function OrderCafe() {
   const { getCafe, addMenu, updateMenu, deleteMenu, updateCafeMenuImage } = useCafe();
   const { addOrder, updateOrder, getOpenOrderByShop, orders, STATUS } = useOrder();
   const { cafeId } = useParams();
+  const navigate = useNavigate();
   const cafe = getCafe(cafeId);
 
   const [currentOrderId, setCurrentOrderId] = useState(null);
@@ -542,12 +543,21 @@ export default function OrderCafe() {
           </div>
         )}
 
-        <Link
-          to={currentOrderId != null ? `/orders/${currentOrderId}` : (orders.length > 0 ? `/orders/${orders[0].id}` : '/orders')}
+        <button
+          type="button"
+          onClick={() => {
+            const hasAnySelection = members.some((m) => selections[m.id] != null);
+            if (!hasAnySelection) {
+              alert('메뉴 선택 전입니다. 한 명 이상 메뉴를 선택한 뒤 확인해 주세요.');
+              return;
+            }
+            const path = currentOrderId != null ? `/orders/${currentOrderId}` : (orders.length > 0 ? `/orders/${orders[0].id}` : '/orders');
+            navigate(path);
+          }}
           className="mt-4 w-full py-3 rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] text-sm font-medium hover:bg-stone-50 flex items-center justify-center gap-2"
         >
           주문취합보기
-        </Link>
+        </button>
       </div>
     </div>
   );

@@ -71,7 +71,12 @@ export function CafeProvider({ children }) {
             setCafes((prev) => (prev.some((c) => c.id === newCafe.id) ? prev : [...prev, newCafe]));
           } else if (payload.eventType === 'UPDATE') {
             setCafes((prev) =>
-              prev.map((c) => (c.id === payload.new.id ? rowToCafe(payload.new) : c))
+              prev.map((c) => {
+                if (c.id !== payload.new.id) return c;
+                const updated = rowToCafe(payload.new);
+                // 메뉴만 수정된 경우 payload에 menu_image가 없을 수 있어 기존 메뉴판 유지
+                return { ...updated, menuImage: updated.menuImage ?? c.menuImage };
+              })
             );
           } else if (payload.eventType === 'DELETE') {
             setCafes((prev) => prev.filter((c) => c.id !== payload.old.id));
@@ -130,7 +135,7 @@ export function CafeProvider({ children }) {
       );
       const cafe = next.find((c) => c.id === cafeId);
       if (supabase && cafe) {
-        supabase.from('cafes').update({ menus: cafe.menus }).eq('id', cafeId).then(({ error }) => {
+        supabase.from('cafes').update({ menus: cafe.menus, menu_image: cafe.menuImage }).eq('id', cafeId).then(({ error }) => {
           if (error) console.error('Supabase add menu:', error);
         });
       }
@@ -159,7 +164,7 @@ export function CafeProvider({ children }) {
       );
       const cafe = next.find((c) => c.id === cafeId);
       if (supabase && cafe) {
-        supabase.from('cafes').update({ menus: cafe.menus }).eq('id', cafeId).then(({ error }) => {
+        supabase.from('cafes').update({ menus: cafe.menus, menu_image: cafe.menuImage }).eq('id', cafeId).then(({ error }) => {
           if (error) console.error('Supabase update menu:', error);
         });
       }
@@ -174,7 +179,7 @@ export function CafeProvider({ children }) {
       );
       const cafe = next.find((c) => c.id === cafeId);
       if (supabase && cafe) {
-        supabase.from('cafes').update({ menus: cafe.menus }).eq('id', cafeId).then(({ error }) => {
+        supabase.from('cafes').update({ menus: cafe.menus, menu_image: cafe.menuImage }).eq('id', cafeId).then(({ error }) => {
           if (error) console.error('Supabase delete menu:', error);
         });
       }

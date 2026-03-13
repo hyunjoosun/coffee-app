@@ -67,7 +67,8 @@ export function CafeProvider({ children }) {
         { event: '*', schema: 'public', table: 'cafes' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setCafes((prev) => [...prev, rowToCafe(payload.new)]);
+            const newCafe = rowToCafe(payload.new);
+            setCafes((prev) => (prev.some((c) => c.id === newCafe.id) ? prev : [...prev, newCafe]));
           } else if (payload.eventType === 'UPDATE') {
             setCafes((prev) =>
               prev.map((c) => (c.id === payload.new.id ? rowToCafe(payload.new) : c))

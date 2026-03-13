@@ -1,6 +1,5 @@
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { isSupabaseEnabled } from '../lib/supabase';
 import { IconCoffee, IconList, IconUsers } from '../components/Icons';
 
 export default function Home() {
@@ -25,9 +24,6 @@ export default function Home() {
             <p className="text-sm text-[var(--color-muted)]">{user.name}님, 안녕하세요</p>
           </div>
         </div>
-        <p className="mt-2 text-xs text-[var(--color-muted)]">
-          {isSupabaseEnabled() ? '✅ 실시간 공유 연결됨 (팀원·카페·주문이 링크 공유 시 보입니다)' : '⚠️ 로컬만 사용 중 (링크 공유해도 상대방에게 안 보입니다. 배포 시 Secret 설정 확인)'}
-        </p>
         <div className="mt-8 flex flex-col gap-3">
           {links.map(({ to, label, Icon }) => (
             <Link

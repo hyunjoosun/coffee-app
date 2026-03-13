@@ -62,7 +62,8 @@ export function TeamProvider({ children }) {
         { event: '*', schema: 'public', table: 'team_members' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setMembers((prev) => [...prev, rowToMember(payload.new)]);
+            const newMember = rowToMember(payload.new);
+            setMembers((prev) => (prev.some((m) => m.id === newMember.id) ? prev : [...prev, newMember]));
           } else if (payload.eventType === 'UPDATE') {
             setMembers((prev) =>
               prev.map((m) => (m.id === payload.new.id ? rowToMember(payload.new) : m))

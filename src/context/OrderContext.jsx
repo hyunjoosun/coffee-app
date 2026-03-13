@@ -70,7 +70,8 @@ export function OrderProvider({ children }) {
         { event: '*', schema: 'public', table: 'orders' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setOrders((prev) => [rowToOrder(payload.new), ...prev]);
+            const newOrder = rowToOrder(payload.new);
+            setOrders((prev) => (prev.some((o) => o.id === newOrder.id) ? prev : [newOrder, ...prev]));
           } else if (payload.eventType === 'UPDATE') {
             setOrders((prev) =>
               prev.map((o) => (o.id === payload.new.id ? rowToOrder(payload.new) : o))

@@ -14,7 +14,7 @@ Tailwind CSS(CDN)로 스타일링.
 같은 앱을 쓰는 사람끼리 **주문을 실시간으로 공유**하려면 Supabase를 연결하세요.
 
 1. [Supabase](https://supabase.com)에서 프로젝트 생성
-2. **SQL Editor**에서 `supabase/schema.sql` 내용 전체 실행 (orders 테이블 + RLS + Realtime)
+2. **SQL Editor**에서 `supabase/schema.sql` 내용 전체 실행 (orders, team_members, cafes 테이블 + RLS + Realtime)
 3. **Settings → API**에서 Project URL, anon public key 복사
 4. 프로젝트 루트에 `.env` 생성:
 

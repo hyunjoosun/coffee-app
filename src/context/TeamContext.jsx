@@ -1,12 +1,12 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase, isSupabaseEnabled } from '../lib/supabase';
 
 const TeamContext = createContext(null);
-
 const STORAGE_KEY = 'ec-coffee-team-members';
 
 const OLD_DEFAULT_NAMES = new Set(['김철수', '이영희', '박민수']);
 
-function loadMembers() {
+function loadMembersFromStorage() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -24,24 +24,87 @@ function loadMembers() {
   return [];
 }
 
+function rowToMember(row) {
+  return { id: row.id, name: row.name };
+}
+
 export function TeamProvider({ children }) {
-  const [members, setMembers] = useState(loadMembers);
+  const [members, setMembers] = useState(loadMembersFromStorage);
+  const [isLoading, setIsLoading] = useState(isSupabaseEnabled());
+
+  const fetchMembers = useCallback(async () => {
+    if (!supabase) return;
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*')
+        .order('id', { ascending: true });
+      if (error) throw error;
+      setMembers((data ?? []).map(rowToMember));
+    } catch (err) {
+      console.error('Supabase fetch team_members:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(members));
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
+    fetchMembers();
+
+    const channel = supabase
+      .channel('team-members-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'team_members' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setMembers((prev) => [...prev, rowToMember(payload.new)]);
+          } else if (payload.eventType === 'UPDATE') {
+            setMembers((prev) =>
+              prev.map((m) => (m.id === payload.new.id ? rowToMember(payload.new) : m))
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setMembers((prev) => prev.filter((m) => m.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [fetchMembers]);
+
+  useEffect(() => {
+    if (!isSupabaseEnabled()) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(members));
+    }
   }, [members]);
 
-  const addMember = (name) => {
+  const addMember = async (name) => {
     if (!name?.trim()) return;
-    setMembers((prev) => [...prev, { id: Date.now(), name: name.trim() }]);
+    const id = Date.now();
+    const member = { id, name: name.trim() };
+
+    if (supabase) {
+      const { error } = await supabase.from('team_members').insert({ id, name: name.trim() });
+      if (error) console.error('Supabase add member:', error);
+    }
+    setMembers((prev) => [...prev, member]);
   };
 
-  const removeMember = (id) => {
+  const removeMember = async (id) => {
+    if (supabase) {
+      const { error } = await supabase.from('team_members').delete().eq('id', id);
+      if (error) console.error('Supabase remove member:', error);
+    }
     setMembers((prev) => prev.filter((m) => m.id !== id));
   };
 
   return (
-    <TeamContext.Provider value={{ members, addMember, removeMember }}>
+    <TeamContext.Provider value={{ members, addMember, removeMember, isLoading: isSupabaseEnabled() ? isLoading : false }}>
       {children}
     </TeamContext.Provider>
   );
